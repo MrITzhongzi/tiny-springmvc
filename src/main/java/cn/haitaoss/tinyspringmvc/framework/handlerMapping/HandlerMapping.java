@@ -9,5 +9,21 @@ import javax.servlet.http.HttpServletRequest;
  *
  */
 public interface HandlerMapping {
-    HandlerExecutionChain getHandler(HttpServletRequest var1) throws Exception;
+    /**
+     * 返回 HandlerExecutionChain
+     * @author haitao.chen
+     * email
+     * date 2021/4/24 7:11 下午
+     * @param request
+     * @return cn.haitaoss.tinyspringmvc.framework.handlerMapping.HandlerExecutionChain
+     */
+    HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception;
+
+    /**
+     * 初始化方法
+     * @author haitao.chen
+     * email
+     * date 2021/4/24 7:10 下午
+     */
+    void init();
 }

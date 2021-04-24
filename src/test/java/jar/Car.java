@@ -1,7 +1,5 @@
 package jar;
 
-import cn.haitaoss.tinyioc.beans.annotation.Autowired;
-
 /**
  * @author haitao.chen
  * email haitaoss@aliyun.com

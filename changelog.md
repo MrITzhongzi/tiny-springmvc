@@ -12,3 +12,223 @@
 - 那么web项目启动的时候，就会读取web.xml 然后创建出这个servlet并调用初始化方法 进行servlet的初始化。
 - init的重要逻辑：我们先从ServletContext获取通过ServletContextListener 的初始化方法注入的父容器。然后再根据 **mvc配置文件 + 父容器** 创建出来的容器就是 MVC容器。
 
+# step-2.1-solve-requestMapping
+
+> 实现http请求 --> controller中具体方法的映射
+
+## 主要的几个类
+
+![image-20210424204448558](.changelog_imgs/image-20210424204448558.png)
+
+- RequestMappingHandler：封装了要执行的方法method，执行方法的对象bean以及参数args
+- HandlerExecutionChain：其中封装了1个RequestMappingHandler实例和1个拦截器列表
+- HandlerMapping：定义了接口规范
+- AnnotationHandlerMapping：实现了HandlerMapping接口，里面有一个重要属性`Map<String,RequestMappingHandler> handlerRegistry` 这里保存 每个url 对应的处理对象是什么
+
+## 一次请求的流程 (注意：并没有加入拦截器的流程)
+
+ -  http请求 -> DispatcherServlet.service() -> 调用doDispatch(req, resp);
+
+    -> 根据请求找到对应的HandleExecutionChain
+
+     `HandlerExecutionChain handlerExecutionChain = handlerMapping.getHandler(req);`  ->
+
+    -> 执行handlerExecutionChain中的目标方法 
+
+    `RequestMappingHandler handler = handlerExecutionChain.getHandler();`
+
+    `handler.getMethod().invoke(handler.getBean(), null);`
+
+## AnnotationHandlerMapping注册 url 和 RequestMappingHandler的核心代码
+
+1. DispatcherServlet 的初始化方法
+
+   ```java
+   public class DispatcherServlet extends HttpServlet {
+       private ApplicationContext mvcContext;
+       private HandlerMapping handlerMapping;
+   
+       @Override
+       public void init() throws ServletException {
+           // 1. 从ServletContext 中获取 spring容器。这个会作用mvcContext容器的父容器
+           // 2. 读取配置在web.xml 中 servlet 的init-param 创建出mvcContext
+           doInit();
+           // 默认使用AnnotationHandlerMapping来处理请求
+           handlerMapping = new AnnotationHandleMapping(mvcContext);
+       }
+   }
+   ```
+
+2. AnnotationHandlerMapping的构造器做了什么
+
+   ```java
+   public class AnnotationHandleMapping implements HandlerMapping {
+       private ApplicationContext mvcContext;
+       private Map<String, RequestMappingHandler> handlerRegistry;
+   
+       public AnnotationHandleMapping(ApplicationContext mvcContext) {
+           this.mvcContext = mvcContext;
+           this.handlerRegistry = new HashMap<>();
+           
+           // 会遍历mvcContext 里面所有的bean，找到使用了@RequestMapping注解的类
+         	// 将@RequestMapping注解的值 和 对应的处理method 组成键值对，保存到handlerRegistry 中
+           init();
+       }
+   }
+   ```
+
+3. init方法做了什么
+
+   - 遍历容器中所有的bean，找到@RequestMapping 标注的类和方法，注册到HandleRegistry中。
+   - 注意：这里写的比较简单，只有类也标注了@RequestMapping 注解我们才能扫描到
+   - 
+
+   ```java
+   public void init() {
+     // 找到容器中所有标注了 @RequestMapping 的类
+     for (Map.Entry<String, BeanDefinition> entry : this.mvcContext.getBeanFactory().getBeanDefinitionMap().entrySet()) {
+       Class clazz = entry.getValue().getBeanClass();
+       Object bean = entry.getValue().getBean();
+   
+       Annotation annotation = clazz.getAnnotation(RequestMapping.class);
+       if (annotation == null) {
+         continue;
+       }
+       String prefix = null;
+       String suffix = null;
+       prefix = ((RequestMapping) annotation).value();
+   
+       // 获取方法的映射路径
+       for (Method declaredMethod : clazz.getDeclaredMethods()) {
+         annotation = declaredMethod.getAnnotation(RequestMapping.class);
+         if (annotation == null) {
+           continue;
+         }
+         suffix = ((RequestMapping) annotation).value();
+   
+         // 构建RequestMappingHandle 然后注册到handlerRegistry 中
+         this.handlerRegistry.put(prefix + suffix, new RequestMappingHandler(bean, declaredMethod, null));
+       }
+   
+     }
+   }
+   ```
+
+4. getHandler方法
+
+   - 根据`request.getServletPath()`  从 handlerRegistry 中得到对应的处理函数 RequestMappingHandler
+   - 根据RequestMappingHandler 和 HandleInterceptor 构建 HandlerExecutionChain 返回
+
+   ```java
+   public HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
+     HandlerExecutionChain handlerExecutionChain = new HandlerExecutionChain();
+     // 根据请求uri 找到对应的handle
+     RequestMappingHandler requestMappingHandler = handlerRegistry.get(request.getServletPath());
+     handlerExecutionChain.setHandler(requestMappingHandler);
+     return handlerExecutionChain;
+   }
+   ```
+
+## DispatcherServlet 处理http请求的逻辑
+
+1. init方法
+
+   - 调用doInit方法
+
+   - 对handlerMapping 属性进行初始化
+
+   ```java
+   public class DispatcherServlet extends HttpServlet {
+       private ApplicationContext mvcContext;
+       private HandlerMapping handlerMapping;
+   
+       @Override
+       public void init() throws ServletException {
+           doInit();
+           // 默认使用AnnotationHandlerMapping来处理请求
+           handlerMapping = new AnnotationHandleMapping(mvcContext);
+       }
+   }
+   ```
+
+2. doInit方法
+
+   - 从ServletContext 中获取 spring容器。这个会作为mvcContext容器的父容器
+   - 读取配置在web.xml 中 servlet 的init-param 创建出mvcContext
+
+   ```java
+   private void doInit() throws ServletException {
+           super.init();
+           System.out.println("DispatcherServlet...init\tspring子容器(mvc)");
+           // 获取mvc配置文件
+           String mvcXmlPath = this.getInitParameter("contextConfigLocation");
+           if (mvcXmlPath == null || mvcXmlPath.length() == 0) {
+               return;
+           }
+           if (mvcXmlPath.startsWith("classpath:")) {
+               mvcXmlPath = mvcXmlPath.substring(10);
+           }
+           // 获取全局上下文
+           ServletContext servletContext = this.getServletContext();
+           try {
+               // 获取父容器
+               ApplicationContext springContext = (ApplicationContext) servletContext.getAttribute("springContext");
+               // 创建mvc的容器，里面整合和spring作为父容器
+               mvcContext = new ClassPathXmlApplicationContext(springContext, mvcXmlPath);
+           } catch (Exception e) {
+               e.printStackTrace();
+           }
+       }
+   ```
+
+3. tomcat处理http请求的逻辑：根据 url-pattern 调用对应 servlet 的 service方法
+
+   ```xml
+   <!-- 注册servlet -->
+   <servlet>
+     <servlet-name>dispatcherServlet</servlet-name>
+     <servlet-class>cn.haitaoss.tinyspringmvc.framework.servlet.DispatcherServlet</servlet-class>
+     <!-- 设置这个servlet 的初始化参数 -->
+     <init-param>
+       <param-name>contextConfigLocation</param-name>
+       <param-value>classpath:applicationContext-mvc.xml</param-value>
+     </init-param>
+     <!-- web项目一启动就创建这个servlet -->
+     <load-on-startup>1</load-on-startup>
+   </servlet>
+   <!-- 配置servlet的过滤规则 -->
+   <servlet-mapping>
+     <servlet-name>dispatcherServlet</servlet-name>
+     <url-pattern>*.do</url-pattern>
+   </servlet-mapping>
+   ```
+
+4. service 方法
+
+   ```java
+    protected void service(HttpServletRequest req, HttpServletResponse resp) {
+           try {
+               doDispatch(req, resp);
+           } catch (Exception e) {
+               e.printStackTrace();
+           }
+       }
+   ```
+
+   - 通过handlerMapping.getHandler(req); 得到 HandleExecutionChain
+   - 调用HandleExecutionChain 里面封装好的目标方法执行业务
+
+   ```java
+   private void doDispatch(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+           // 找到请求对应的handler
+           HandlerExecutionChain handlerExecutionChain = handlerMapping.getHandler(req);
+   
+           // 执行目标方法
+           RequestMappingHandler handler = handlerExecutionChain.getHandler();
+           // 至于如何传参，就是HandlerAdapter的事情了
+           handler.getMethod().invoke(handler.getBean(), null);
+       }
+   ```
+
+   
+

@@ -5,7 +5,7 @@
          version="4.0">
     <!-- 注册监听器，web项目启动就会创建监听器，调用监听器的模板方法 -->
     <listener>
-        <listener-class>cn.haitaoss.tinyspringmvc.framework.contextlistener.ContextLoaderListener</listener-class>
+        <listener-class>cn.haitaoss.tinyspringmvc.framework.contextListener.ContextLoaderListener</listener-class>
     </listener>
     <!-- 设置上下文参数 -->
     <context-param>

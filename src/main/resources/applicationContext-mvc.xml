@@ -1,4 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <beans>
     <component-scan base-package="cn.haitaoss.tinyspringmvc.webappProject.controller"></component-scan>
+    <!-- 开启aop的自动织入 -->
+    <bean id="autoProxy" class="cn.haitaoss.tinyioc.aop.AspectJAwareAdvisorAutoProxyCreator"></bean>
+    <!-- 设置切面类 -->
+    <bean id="aspectJExpressionPointcutAdvisor" class="cn.haitaoss.tinyioc.aop.AspectJExpressionPointcutAdvisor">
+        <!-- timerInterceptor 我通过注解注册到IOC容器中了 -->
+        <property name="advice" ref="timerInterceptor"></property>
+        <property name="expression"
+                  value="execution(* cn.haitaoss.tinyspringmvc.webappProject.controller..*.*(..))"></property>
+    </bean>
 </beans>

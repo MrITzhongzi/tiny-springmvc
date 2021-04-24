@@ -1,4 +1,4 @@
-package cn.haitaoss.tinyspringmvc.framework.contextlistener;
+package cn.haitaoss.tinyspringmvc.framework.contextListener;
 
 import cn.haitaoss.tinyioc.context.ApplicationContext;
 import cn.haitaoss.tinyioc.context.ClassPathXmlApplicationContext;

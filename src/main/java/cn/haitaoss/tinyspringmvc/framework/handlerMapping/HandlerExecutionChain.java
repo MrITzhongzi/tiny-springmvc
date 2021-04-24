@@ -7,14 +7,14 @@ package cn.haitaoss.tinyspringmvc.framework.handlerMapping;
  *
  */
 public class HandlerExecutionChain {
-    private Object handler;
+    private RequestMappingHandler handler;
     private HandleInterceptor[] interceptors;
 
-    public Object getHandler() {
+    public RequestMappingHandler getHandler() {
         return handler;
     }
 
-    public void setHandler(Object handler) {
+    public void setHandler(RequestMappingHandler handler) {
         this.handler = handler;
     }
 
