@@ -10,7 +10,7 @@ import cn.haitaoss.tinyioc.beans.annotation.Value;
  *
  */
 @Service
-public class Person {
+public class PersonService {
     @Value("黄大宁的第一次注入")
     private String name;
 

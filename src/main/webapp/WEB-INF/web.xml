@@ -7,9 +7,26 @@
     <listener>
         <listener-class>cn.haitaoss.tinyspringmvc.framework.contextlistener.ContextLoaderListener</listener-class>
     </listener>
-    <!-- 设置上下网参数 -->
+    <!-- 设置上下文参数 -->
     <context-param>
         <param-name>contextConfigLocation</param-name>
         <param-value>classpath:applicationContext.xml</param-value>
     </context-param>
+    <!-- 注册servlet -->
+    <servlet>
+        <servlet-name>dispatcherServlet</servlet-name>
+        <servlet-class>cn.haitaoss.tinyspringmvc.framework.servlet.DispatcherServlet</servlet-class>
+        <!-- 设置这个servlet 的初始化参数 -->
+        <init-param>
+            <param-name>contextConfigLocation</param-name>
+            <param-value>classpath:applicationContext-mvc.xml</param-value>
+        </init-param>
+        <!-- web项目一启动就创建这个servlet -->
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <!-- 配置servlet的过滤规则 -->
+    <servlet-mapping>
+        <servlet-name>dispatcherServlet</servlet-name>
+        <url-pattern>*.do</url-pattern>
+    </servlet-mapping>
 </web-app>

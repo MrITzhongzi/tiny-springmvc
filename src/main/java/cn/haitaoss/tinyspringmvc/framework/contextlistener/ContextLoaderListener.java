@@ -3,6 +3,7 @@ package cn.haitaoss.tinyspringmvc.framework.contextlistener;
 import cn.haitaoss.tinyioc.context.ApplicationContext;
 import cn.haitaoss.tinyioc.context.ClassPathXmlApplicationContext;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
@@ -15,8 +16,10 @@ import javax.servlet.ServletContextListener;
 public class ContextLoaderListener implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent sce) {
+        System.out.println("ServletContextListener...contextInitialized\tspring父容器");
+        ServletContext servletContext = sce.getServletContext();
         // 获取web.xml的配置信息
-        String springXmlPath = sce.getServletContext().getInitParameter("contextConfigLocation");
+        String springXmlPath = servletContext.getInitParameter("contextConfigLocation");
         if (springXmlPath.startsWith("classpath:")) {
             springXmlPath = springXmlPath.substring(10);
         }
@@ -24,8 +27,8 @@ public class ContextLoaderListener implements ServletContextListener {
         ApplicationContext applicationContext = null;
         try {
             applicationContext = new ClassPathXmlApplicationContext(springXmlPath);
-            Object person = applicationContext.getBean("person");
-            System.out.println(person);
+            // 将applicationContext 保存到web应用上下文中
+            servletContext.setAttribute("springContext", applicationContext);
         } catch (Exception e) {
             e.printStackTrace();
         }
