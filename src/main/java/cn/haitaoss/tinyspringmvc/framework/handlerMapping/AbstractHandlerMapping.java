@@ -6,7 +6,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author haitao.chen
@@ -15,15 +14,12 @@ import java.util.Map;
  *
  */
 public abstract class AbstractHandlerMapping implements HandlerMapping {
+    protected static HashMap<String, Object> handlerRegistry = new HashMap<>();
+    protected static List<HandlerInterceptor> handlerInterceptors = new ArrayList<>();
     protected ApplicationContext mvcContext;
-    protected Map<String, RequestMappingHandler> handlerRegistry;
-    List<HandlerInterceptor> handlerInterceptors;
 
     public AbstractHandlerMapping(ApplicationContext mvcContext) {
         this.mvcContext = mvcContext;
-        handlerInterceptors = new ArrayList<>();
-        handlerRegistry = new HashMap<>();
-        init();
     }
 
     public ApplicationContext getMvcContext() {
@@ -34,11 +30,11 @@ public abstract class AbstractHandlerMapping implements HandlerMapping {
         this.mvcContext = mvcContext;
     }
 
-    public Map<String, RequestMappingHandler> getHandlerRegistry() {
+    public HashMap<String, Object> getHandlerRegistry() {
         return handlerRegistry;
     }
 
-    public void setHandlerRegistry(Map<String, RequestMappingHandler> handlerRegistry) {
+    public void setHandlerRegistry(HashMap<String, Object> handlerRegistry) {
         this.handlerRegistry = handlerRegistry;
     }
 
@@ -48,7 +44,7 @@ public abstract class AbstractHandlerMapping implements HandlerMapping {
         // 设置此次请求 对应的处理方法
         handlerExecutionChain.setHandler(handlerRegistry.get(request.getServletPath()));
         // 获取此次请求匹配的拦截器
-        List<HandlerInterceptor> interceptors = filterWithUrl(handlerInterceptors, request.getRequestURI());
+        List<HandlerInterceptor> interceptors = filterWithUrl(handlerInterceptors, request.getServletPath());
         handlerExecutionChain.setInterceptors(interceptors);
         // 返回构建好的HandleExecutionChain
         return handlerExecutionChain;
@@ -84,12 +80,31 @@ public abstract class AbstractHandlerMapping implements HandlerMapping {
     }
 
     /**
-     * init 是模板方法，子类可以重写这个方法，来做一些初始化的操作
+     * registryURLAndHandler 是模板方法，子类可以重写这个方法，来做一些初始化的操作
      * @author haitao.chen
      * email
      * date 2021/4/25 9:59 上午
      */
-    protected void init() {
+    protected void registryURLAndHandler() {
+    }
 
+    public void init() {
+        registryURLAndHandler();// 注册map，保存url和handler的对应关系
+        initHandlerInterceptors(); // 收集容器中所有的HandlerInterceptor
+    }
+
+    /**
+     * 收集容器中所有的HandlerInterceptor 的实现，保存到父类handlerInterceptors属性中
+     * @author haitao.chen
+     * email
+     * date 2021/4/25 11:23 上午
+     */
+    private void initHandlerInterceptors() {
+        try {
+            if (handlerInterceptors.isEmpty())
+                handlerInterceptors = mvcContext.getBeanFactory().getBeansForType(HandlerInterceptor.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

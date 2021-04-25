@@ -2,7 +2,7 @@ package cn.haitaoss.tinyspringmvc.webappProject.controller;
 
 import cn.haitaoss.tinyioc.beans.annotation.Component;
 import cn.haitaoss.tinyspringmvc.framework.handlerMapping.HandlerInterceptor;
-import cn.haitaoss.tinyspringmvc.framework.handlerMapping.ModelAndView;
+import cn.haitaoss.tinyspringmvc.framework.modelAndView.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

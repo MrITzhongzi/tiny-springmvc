@@ -1,5 +1,7 @@
 package cn.haitaoss.tinyspringmvc.framework.handlerMapping;
 
+import cn.haitaoss.tinyspringmvc.framework.modelAndView.ModelAndView;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -10,7 +12,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 public interface HandlerInterceptor {
     /**
-     * 该方法规定被拦截的地址
+     * 该拦截器应该和那些方法有关系
      * @author haitao.chen
      * email
      * date 2021/4/24 9:33 下午

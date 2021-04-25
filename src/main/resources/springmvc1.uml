@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>cn.haitaoss.tinyspringmvc.framework.handlerMapping.AnnotationHandleMapping</OriginalElement>
+  <nodes>
+    <node x="490.32708333333335" y="199.0">cn.haitaoss.tinyspringmvc.framework.handlerMapping.HandlerExecutionChain</node>
+    <node x="85.70833333333337" y="457.0">cn.haitaoss.tinyspringmvc.framework.handlerMapping.AnnotationHandleMapping</node>
+    <node x="229.28541666666672" y="657.0">cn.haitaoss.tinyspringmvc.framework.servlet.DispatcherServlet</node>
+    <node x="0.0" y="0.0">cn.haitaoss.tinyspringmvc.framework.handlerMapping.RequestMappingHandler</node>
+    <node x="501.2208333333333" y="328.0">cn.haitaoss.tinyspringmvc.framework.handlerMapping.HandlerMapping</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="cn.haitaoss.tinyspringmvc.framework.handlerMapping.AnnotationHandleMapping" target="cn.haitaoss.tinyspringmvc.framework.handlerMapping.HandlerMapping">
+      <point x="187.91666666666669" y="-75.0" />
+      <point x="499.12500000000006" y="437.0" />
+      <point x="613.9708333333333" y="437.0" />
+      <point x="-112.75" y="39.5" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="0.773851590106007" x="476.5" y="414.50000000000006" />
+  <SelectedNodes>
+    <node>cn.haitaoss.tinyspringmvc.framework.handlerMapping.AnnotationHandleMapping</node>
+  </SelectedNodes>
+  <Categories>
+    <Category>Fields</Category>
+    <Category>Constructors</Category>
+    <Category>Methods</Category>
+    <Category>Properties</Category>
+    <Category>Inner Classes</Category>
+  </Categories>
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>private</VISIBILITY>
+</Diagram>
+

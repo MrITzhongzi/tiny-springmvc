@@ -1,4 +1,4 @@
-package cn.haitaoss.tinyspringmvc.framework.handlerMapping;
+package cn.haitaoss.tinyspringmvc.framework.modelAndView;
 
 /**
  * @author haitao.chen

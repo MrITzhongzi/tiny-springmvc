@@ -24,11 +24,9 @@ public class DispatcherServlet extends HttpServlet {
     @Override
     public void init() throws ServletException {
         doInit();
-        // 默认使用AnnotationHandlerMapping来处理请求
-        handlerMapping = new AnnotationHandleMapping(mvcContext);
     }
 
-    private void doInit() throws ServletException {
+    private void doInit() {
         System.out.println("DispatcherServlet...init\tspring子容器(mvc)");
         // 获取mvc配置文件
         String mvcXmlPath = this.getInitParameter("contextConfigLocation");
@@ -48,6 +46,18 @@ public class DispatcherServlet extends HttpServlet {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        // 初始化HandlerMapping
+        InitHandlerMapping(mvcContext);
+    }
+
+    private void InitHandlerMapping(ApplicationContext mvcContext) {
+        // 默认的handlerMapping 是 AnnotationHandlerMapping
+        handlerMapping = new AnnotationHandlerMapping(mvcContext);
+        ((AnnotationHandlerMapping) handlerMapping).init();
+        new ControllerHandlerMapping(mvcContext).init();
+        new SimpleUrlHandlerMapping(mvcContext).init();
+        new BeanNameHandlerMapping(mvcContext).init();
     }
 
     @Override
@@ -62,7 +72,7 @@ public class DispatcherServlet extends HttpServlet {
     private void doDispatch(HttpServletRequest req, HttpServletResponse resp) throws Exception {
         // 找到请求对应的handler
         HandlerExecutionChain handlerExecutionChain = handlerMapping.getHandler(req);
-        RequestMappingHandler handler = handlerExecutionChain.getHandler();
+        Object handler = handlerExecutionChain.getHandler();
         List<HandlerInterceptor> handlerInterceptors = handlerExecutionChain.getInterceptors();
 
         // 拦截器执行特点： 先执行全部的preHandler方法。只要执行的preHandler方法没有返回false 那么对应的afterCompletion一定会执行。
@@ -77,6 +87,8 @@ public class DispatcherServlet extends HttpServlet {
         }
         // 只要某一个HandlerInterceptor 的 preHandler 返回了false，那么不应该调用目标方法（这里还没有实现这个功能）
         // 至于如何传参，就是HandlerAdapter的事情了
-        handler.getMethod().invoke(handler.getBean(), null);
+        if (handler instanceof RequestMappingHandler) {
+            ((RequestMappingHandler) handler).getMethod().invoke(((RequestMappingHandler) handler).getBean(), null);
+        }
     }
 }
