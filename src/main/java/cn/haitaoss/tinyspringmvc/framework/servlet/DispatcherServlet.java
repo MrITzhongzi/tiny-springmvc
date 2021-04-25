@@ -7,9 +7,10 @@ import cn.haitaoss.tinyspringmvc.framework.handlerAdapter.ControllerHandlerAdapt
 import cn.haitaoss.tinyspringmvc.framework.handlerAdapter.HandlerAdapter;
 import cn.haitaoss.tinyspringmvc.framework.handlerMapping.*;
 import cn.haitaoss.tinyspringmvc.framework.modelAndView.ModelAndView;
+import cn.haitaoss.tinyspringmvc.framework.view.View;
+import cn.haitaoss.tinyspringmvc.framework.view.ViewResolver;
 
 import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -26,13 +27,29 @@ public class DispatcherServlet extends HttpServlet {
     private ApplicationContext mvcContext;
     private HandlerMapping handlerMapping;
     private List<HandlerAdapter> handlerAdapters = null;
+    private ViewResolver resolver = null;
 
     @Override
-    public void init() throws ServletException {
-        doInit();
+    public void init() {
+        try {
+            doInit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    private void doInit() {
+    private void doInit() throws Exception {
+        // 初始化mvc容器
+        initSpringMVC();
+        // 初始化HandlerMapping
+        initHandlerMappings(mvcContext);
+        // 初始化handlerAdapter
+        initHandlerAdapters(mvcContext);
+        // 初始化ViewResolver
+        initViewResolver(mvcContext);
+    }
+
+    private void initSpringMVC() {
         System.out.println("DispatcherServlet...init\tspring子容器(mvc)");
         // 获取mvc配置文件
         String mvcXmlPath = this.getInitParameter("contextConfigLocation");
@@ -52,11 +69,14 @@ public class DispatcherServlet extends HttpServlet {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
 
-        // 初始化HandlerMapping
-        initHandlerMappings(mvcContext);
-        // 初始化handlerAdapter
-        initHandlerAdapters(mvcContext);
+    private void initViewResolver(ApplicationContext mvcContext) throws Exception {
+        List<ViewResolver> resolvers = mvcContext.getBeanFactory().getBeansForType(ViewResolver.class);
+        if (resolvers.size() != 1) {
+            throw new Exception("未配置视图解析器或配置多个");
+        }
+        this.resolver = resolvers.get(0);
     }
 
     private void initHandlerAdapters(ApplicationContext mvcContext) {
@@ -94,10 +114,15 @@ public class DispatcherServlet extends HttpServlet {
 
         // 进入HandlerAdapter模块(里面会执行req 对应的 method)
         // modelAndView 是执行方法的返回结果
-        ModelAndView modelAndView = doHandlerAdapter(req, resp, handler);
+        ModelAndView mv = doHandlerAdapter(req, resp, handler);
+
+        // 视图解析器解析mv，返回view
+        View view = resolver.resolveViewName(mv.getView());
+        // 页面渲染，渲染其实就是返回信息给客户端
+        view.render(mv.getModel(), req, resp);
 
         // 进行POST处理，执行handlerInterceptor.postHandle
-        doInterceptorsPostHandle(req, resp, handlerInterceptors, handler, modelAndView);
+        doInterceptorsPostHandle(req, resp, handlerInterceptors, handler, mv);
 
     }
 

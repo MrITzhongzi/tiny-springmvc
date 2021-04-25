@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>cn.haitaoss.tinyspringmvc.framework.view.InternalResourceView</OriginalElement>
+  <nodes>
+    <node x="0.0" y="106.0">cn.haitaoss.tinyspringmvc.framework.view.InternalResourceView</node>
+    <node x="374.0400000000001" y="0.0">cn.haitaoss.tinyspringmvc.framework.view.View</node>
+    <node x="349.2800000000001" y="306.0">cn.haitaoss.tinyspringmvc.framework.view.InternalResourceViewResolver</node>
+    <node x="596.0000000000001" y="153.0">cn.haitaoss.tinyspringmvc.framework.view.ViewResolver</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="cn.haitaoss.tinyspringmvc.framework.view.InternalResourceViewResolver" target="cn.haitaoss.tinyspringmvc.framework.view.View">
+      <point x="113.60000000000002" y="-63.0" />
+      <point x="604.8800000000001" y="286.0" />
+      <point x="870.5" y="286.0" />
+      <point x="870.5" y="81.0" />
+      <point x="854.0400000000001" y="81.0" />
+      <point x="192.0" y="28.0" />
+    </edge>
+    <edge source="cn.haitaoss.tinyspringmvc.framework.view.InternalResourceViewResolver" target="cn.haitaoss.tinyspringmvc.framework.view.InternalResourceView">
+      <point x="-113.60000000000002" y="-63.0" />
+      <point x="377.68000000000006" y="286.0" />
+      <point x="96.0" y="286.0" />
+      <point x="-192.0" y="75.0" />
+    </edge>
+    <edge source="cn.haitaoss.tinyspringmvc.framework.view.InternalResourceView" target="cn.haitaoss.tinyspringmvc.framework.view.View">
+      <point x="0.0" y="-75.0" />
+      <point x="288.0" y="81.0" />
+      <point x="470.0400000000001" y="81.0" />
+      <point x="-192.0" y="28.0" />
+    </edge>
+    <edge source="cn.haitaoss.tinyspringmvc.framework.view.ViewResolver" target="cn.haitaoss.tinyspringmvc.framework.view.View">
+      <point x="0.0" y="-28.0" />
+      <point x="728.0000000000001" y="81.0" />
+      <point x="662.0400000000001" y="81.0" />
+      <point x="0.0" y="28.0" />
+    </edge>
+    <edge source="cn.haitaoss.tinyspringmvc.framework.view.InternalResourceViewResolver" target="cn.haitaoss.tinyspringmvc.framework.view.ViewResolver">
+      <point x="56.799999999999955" y="-63.0" />
+      <point x="548.08" y="276.0" />
+      <point x="728.0000000000001" y="276.0" />
+      <point x="0.0" y="28.0" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="1.0" x="475.5" y="216.0" />
+  <SelectedNodes />
+  <Categories>
+    <Category>Inner Classes</Category>
+    <Category>Properties</Category>
+    <Category>Methods</Category>
+    <Category>Constructors</Category>
+    <Category>Fields</Category>
+  </Categories>
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>private</VISIBILITY>
+</Diagram>
+

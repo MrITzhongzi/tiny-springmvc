@@ -595,3 +595,152 @@ public ModelAndView handle(HttpServletRequest request, HttpServletResponse respo
 }
 ```
 
+# step-4.1-solveViewResolverAndView
+
+> 实现视图和视图解析器
+
+**视图解析器就是根据配置返回视图。视图的作用就是==响应数据给客户端==。**
+
+## 类图
+
+![image-20210425170631447](.changelog_imgs/image-20210425170631447.png)
+
+## ViewResolver
+
+ViewResolver 是一个接口，作用就是返回View
+
+```java
+public interface ViewResolver {
+    View resolveViewName(String viewName) throws Exception;
+}
+```
+
+```java
+public class InternalResourceViewResolver extends InternalResourceView implements ViewResolver {
+    private String viewClass;
+    private String prefix;
+    private String suffix;
+    @Override
+    public View resolveViewName(String viewName) throws Exception {
+        if (viewClass.equals(InternalResourceView.class.getName())) {
+            if (viewName.startsWith("redirect:"))
+                return new InternalResourceView(viewName.substring(9), true);
+            else
+                return new InternalResourceView(prefix + viewName + suffix, false);
+        }
+        return null;
+    }
+}
+
+```
+
+
+
+## View
+
+View是一个接口，作用就是响应数据给客户端。
+
+```java
+public interface View {
+    void render(Map<String, ?> model, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException;
+}
+```
+
+```java
+public class InternalResourceView implements View {
+    private String path;
+    private boolean isRedirect;
+
+    public InternalResourceView() {
+    }
+
+    public InternalResourceView(String path, boolean isRedirect) {
+        this.path = path;
+        this.isRedirect = isRedirect;
+    }
+
+    @Override
+    public void render(Map<String, ?> model, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        // 将model 里面的属性保存到request域中
+        for (Map.Entry<String, ?> entry : model.entrySet()) {
+            request.setAttribute(entry.getKey(), entry.getValue());
+        }
+        if (!this.isRedirect)
+            request.getRequestDispatcher(path).forward(request, response);
+        else
+            response.sendRedirect(path);
+    }
+}
+```
+
+
+
+## DispatcherServlet
+
+```java
+public class DispatcherServlet extends HttpServlet {
+    private ApplicationContext mvcContext; // mvc容器
+    private HandlerMapping handlerMapping; // HandlerMapping，默认是AnnotationHandlerMapping
+    private List<HandlerAdapter> handlerAdapters = null; // handler 适配器，不同handler执行方法不一样
+    private ViewResolver resolver = null; // 视图解析器
+}
+```
+
+
+
+- 初始化要执行的方法
+
+  ```java
+  private void doInit() throws Exception {
+    // 初始化mvc容器
+    initSpringMVC();
+    // 初始化HandlerMapping
+    initHandlerMappings(mvcContext);
+    // 初始化handlerAdapter
+    initHandlerAdapters(mvcContext);
+    // 初始化ViewResolver
+    initViewResolver(mvcContext);
+  }
+  ```
+
+- initViewResolver
+
+  ```java
+  private void initViewResolver(ApplicationContext mvcContext) throws Exception {
+    List<ViewResolver> resolvers = mvcContext.getBeanFactory().getBeansForType(ViewResolver.class);
+    if (resolvers.size() != 1) {
+      throw new Exception("未配置视图解析器或配置多个");
+    }
+    this.resolver = resolvers.get(0);
+  }
+  ```
+
+- 业务执行会调用的方法 doDispatch
+
+  ```java
+  private void doDispatch(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+    // 找到请求对应的handlerMapping
+    HandlerExecutionChain handlerExecutionChain = doHandlerMapping(req);
+    Object handler = handlerExecutionChain.getHandler();
+    List<HandlerInterceptor> handlerInterceptors = handlerExecutionChain.getInterceptors();
+  
+    // 进行前置处理，执行handlerInterceptor.preHandle
+    doInterceptorsPreHandle(req, resp, handlerInterceptors, handler);
+  
+    // 进入HandlerAdapter模块(里面会执行req 对应的 method)
+    // modelAndView 是执行方法的返回结果
+    ModelAndView mv = doHandlerAdapter(req, resp, handler);
+  
+    // 视图解析器解析mv，返回view
+    View view = resolver.resolveViewName(mv.getView());
+    // 页面渲染，渲染其实就是返回信息给客户端
+    view.render(mv.getModel(), req, resp);
+  
+    // 进行POST处理，执行handlerInterceptor.postHandle
+    doInterceptorsPostHandle(req, resp, handlerInterceptors, handler, mv);
+  
+  }
+  ```
+
+  
+

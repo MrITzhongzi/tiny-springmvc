@@ -3,7 +3,11 @@ package cn.haitaoss.tinyspringmvc.webappProject.controller;
 import cn.haitaoss.tinyioc.beans.annotation.Autowired;
 import cn.haitaoss.tinyioc.beans.annotation.Controller;
 import cn.haitaoss.tinyspringmvc.framework.annotation.RequestMapping;
+import cn.haitaoss.tinyspringmvc.framework.modelAndView.Model;
+import cn.haitaoss.tinyspringmvc.framework.modelAndView.ModelAndView;
 import cn.haitaoss.tinyspringmvc.webappProject.service.PersonService;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * @author haitao.chen
@@ -35,6 +39,28 @@ public class PersonController {
         System.out.println(age);
         System.out.println(baby);
         System.out.println(name);
+    }
+
+    // http://localhost:8080/web/mvc/person/sleep.do?time=100
+    @RequestMapping("sleep.do")
+    public String sleep(int time, Model model) {
+        System.out.println("i sleep " + time + " hours");
+        model.put("time", time);
+        return "success";
+    }
+
+    // http://localhost:8080/web/mvc/person/sleep2.do?time=100
+    @RequestMapping("sleep2.do")
+    public ModelAndView sleep2(int time, ModelAndView mv) {
+        System.out.println("i sleep " + time + " hours");
+        mv.setView("success");
+        return mv;
+    }
+
+    // http://localhost:8080/web/mvc/person/redirect.do
+    @RequestMapping("redirect.do")
+    public String redirect(HttpServletRequest request) {
+        return "redirect:" + request.getContextPath() + "/notice/error.jsp";
     }
 
     public PersonService getPersonService() {
