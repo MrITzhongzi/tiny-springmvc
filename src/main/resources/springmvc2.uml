@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>cn.haitaoss.tinyspringmvc.framework.handlerMapping.AbstractHandlerMapping</OriginalElement>
+  <nodes>
+    <node x="424.0660383597884" y="209.0">cn.haitaoss.tinyspringmvc.framework.handlerMapping.HandlerExecutionChain</node>
+    <node x="288.38164682539696" y="691.0">cn.haitaoss.tinyspringmvc.framework.handlerMapping.AnnotationHandleMapping</node>
+    <node x="871.4183531746033" y="867.0">cn.haitaoss.tinyspringmvc.framework.servlet.DispatcherServlet</node>
+    <node x="0.0" y="0.0">cn.haitaoss.tinyspringmvc.framework.handlerMapping.RequestMappingHandler</node>
+    <node x="439.0" y="11.5">cn.haitaoss.tinyspringmvc.framework.handlerMapping.HandlerInterceptor</node>
+    <node x="186.3630952380954" y="444.0">cn.haitaoss.tinyspringmvc.framework.handlerMapping.AbstractHandlerMapping</node>
+    <node x="763.0660383597884" y="338.0">cn.haitaoss.tinyspringmvc.framework.handlerMapping.HandlerMapping</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="cn.haitaoss.tinyspringmvc.framework.handlerMapping.AbstractHandlerMapping" target="cn.haitaoss.tinyspringmvc.framework.handlerMapping.HandlerMapping">
+      <point x="260.1428571428571" y="-98.5" />
+      <point x="750.0059523809525" y="424.0" />
+      <point x="875.8160383597884" y="424.0" />
+      <point x="-112.75" y="28.0" />
+    </edge>
+    <edge source="cn.haitaoss.tinyspringmvc.framework.servlet.DispatcherServlet" target="cn.haitaoss.tinyspringmvc.framework.handlerMapping.HandlerMapping">
+      <point x="0.0" y="-86.0" />
+      <point x="1112.4183531746035" y="837.0" />
+      <point x="1259.5660383597883" y="837.0" />
+      <point x="1259.5660383597883" y="424.0" />
+      <point x="1101.3160383597883" y="424.0" />
+      <point x="112.75" y="28.0" />
+    </edge>
+    <edge source="cn.haitaoss.tinyspringmvc.framework.handlerMapping.HandlerExecutionChain" target="cn.haitaoss.tinyspringmvc.framework.handlerMapping.HandlerInterceptor">
+      <point x="39.75" y="-39.5" />
+      <point x="622.8160383597884" y="189.0" />
+      <point x="606.25" y="189.0" />
+      <point x="-167.25" y="63.0" />
+    </edge>
+    <edge source="cn.haitaoss.tinyspringmvc.framework.handlerMapping.AnnotationHandleMapping" target="cn.haitaoss.tinyspringmvc.framework.handlerMapping.HandlerInterceptor">
+      <point x="145.5" y="-63.0" />
+      <point x="627.881646825397" y="671.0" />
+      <point x="1224.5660383597883" y="671.0" />
+      <point x="1224.5660383597883" y="189.0" />
+      <point x="940.75" y="189.0" />
+      <point x="167.24999999999997" y="63.0" />
+    </edge>
+    <edge source="cn.haitaoss.tinyspringmvc.framework.handlerMapping.AnnotationHandleMapping" target="cn.haitaoss.tinyspringmvc.framework.handlerMapping.RequestMappingHandler">
+      <point x="-145.5" y="-63.0" />
+      <point x="336.88164682539696" y="671.0" />
+      <point x="120.27668650793657" y="671.0" />
+      <point x="120.27668650793657" y="189.0" />
+      <point x="104.75" y="189.0" />
+      <point x="-104.75" y="74.5" />
+    </edge>
+    <edge source="cn.haitaoss.tinyspringmvc.framework.handlerMapping.AbstractHandlerMapping" target="cn.haitaoss.tinyspringmvc.framework.handlerMapping.HandlerExecutionChain">
+      <point x="-1.1368683772161603E-13" y="-98.5" />
+      <point x="489.8630952380953" y="424.0" />
+      <point x="470.5683531746033" y="424.0" />
+      <point x="470.5683531746033" y="318.0" />
+      <point x="463.8160383597884" y="318.0" />
+      <point x="-119.25" y="39.5" />
+    </edge>
+    <edge source="cn.haitaoss.tinyspringmvc.framework.servlet.DispatcherServlet" target="cn.haitaoss.tinyspringmvc.framework.handlerMapping.HandlerInterceptor">
+      <point x="192.79999999999995" y="-86.0" />
+      <point x="1305.2183531746032" y="847.0" />
+      <point x="1281.5660383597883" y="847.0" />
+      <point x="1281.5660383597883" y="179.0" />
+      <point x="1052.25" y="179.0" />
+      <point x="278.75" y="63.0" />
+    </edge>
+    <edge source="cn.haitaoss.tinyspringmvc.framework.handlerMapping.AbstractHandlerMapping" target="cn.haitaoss.tinyspringmvc.framework.handlerMapping.HandlerInterceptor">
+      <point x="173.42857142857144" y="-98.5" />
+      <point x="663.2916666666669" y="414.0" />
+      <point x="752.5660383597884" y="414.0" />
+      <point x="752.5660383597884" y="189.0" />
+      <point x="829.25" y="189.0" />
+      <point x="55.75" y="63.0" />
+    </edge>
+    <edge source="cn.haitaoss.tinyspringmvc.framework.servlet.DispatcherServlet" target="cn.haitaoss.tinyspringmvc.framework.handlerMapping.HandlerExecutionChain">
+      <point x="96.40000000000009" y="-86.0" />
+      <point x="1208.8183531746035" y="847.0" />
+      <point x="1270.5660383597883" y="847.0" />
+      <point x="1270.5660383597883" y="308.0" />
+      <point x="702.3160383597884" y="308.0" />
+      <point x="119.25" y="39.5" />
+    </edge>
+    <edge source="cn.haitaoss.tinyspringmvc.framework.handlerMapping.HandlerExecutionChain" target="cn.haitaoss.tinyspringmvc.framework.handlerMapping.RequestMappingHandler">
+      <point x="-119.25" y="-39.5" />
+      <point x="463.8160383597884" y="179.0" />
+      <point x="314.2499999999999" y="179.0" />
+      <point x="104.74999999999989" y="74.5" />
+    </edge>
+    <edge source="cn.haitaoss.tinyspringmvc.framework.servlet.DispatcherServlet" target="cn.haitaoss.tinyspringmvc.framework.handlerMapping.RequestMappingHandler">
+      <point x="-192.79999999999995" y="-86.0" />
+      <point x="919.6183531746034" y="847.0" />
+      <point x="92.75813492063503" y="847.0" />
+      <point x="92.75813492063503" y="189.0" />
+      <point x="34.91666666666663" y="189.0" />
+      <point x="-174.58333333333337" y="74.5" />
+    </edge>
+    <edge source="cn.haitaoss.tinyspringmvc.framework.handlerMapping.AbstractHandlerMapping" target="cn.haitaoss.tinyspringmvc.framework.handlerMapping.RequestMappingHandler">
+      <point x="-173.4285714285715" y="-98.5" />
+      <point x="316.4345238095239" y="414.0" />
+      <point x="171.18670634920647" y="414.0" />
+      <point x="171.18670634920647" y="189.0" />
+      <point x="244.41666666666663" y="189.0" />
+      <point x="34.91666666666663" y="74.5" />
+    </edge>
+    <edge source="cn.haitaoss.tinyspringmvc.framework.handlerMapping.AnnotationHandleMapping" target="cn.haitaoss.tinyspringmvc.framework.handlerMapping.AbstractHandlerMapping">
+      <point x="-48.5" y="-63.0" />
+      <point x="433.88164682539696" y="661.0" />
+      <point x="338.1130952380954" y="661.0" />
+      <point x="-151.75" y="98.5" />
+    </edge>
+    <edge source="cn.haitaoss.tinyspringmvc.framework.handlerMapping.HandlerMapping" target="cn.haitaoss.tinyspringmvc.framework.handlerMapping.HandlerExecutionChain">
+      <point x="0.0" y="-28.0" />
+      <point x="988.5660383597884" y="318.0" />
+      <point x="622.8160383597884" y="318.0" />
+      <point x="39.75" y="39.5" />
+    </edge>
+    <edge source="cn.haitaoss.tinyspringmvc.framework.servlet.DispatcherServlet" target="cn.haitaoss.tinyspringmvc.framework.handlerMapping.AnnotationHandleMapping">
+      <point x="-96.40000000000009" y="-86.0" />
+      <point x="1016.0183531746032" y="837.0" />
+      <point x="482.38164682539696" y="837.0" />
+      <point x="0.0" y="63.0" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="0.8260685257201836" x="738.2341588576528" y="543.1183623382418" />
+  <SelectedNodes />
+  <Categories>
+    <Category>Fields</Category>
+    <Category>Constructors</Category>
+    <Category>Methods</Category>
+    <Category>Properties</Category>
+    <Category>Inner Classes</Category>
+  </Categories>
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>private</VISIBILITY>
+</Diagram>
+

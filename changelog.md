@@ -230,5 +230,128 @@
        }
    ```
 
-   
+# step-2.2-solve-interceptor
+
+> 实现拦截器 和 修改类结构
+
+![image-20210425100426610](.changelog_imgs/image-20210425100426610.png)
+
+## AbstractHandlerMapping
+
+- 实现HandlerMapping接口，并且定义了一个模板方法init()。子类有一些初始化操作可以重写init方法
+
+````java
+public abstract class AbstractHandlerMapping implements HandlerMapping {
+    protected ApplicationContext mvcContext;
+    protected Map<String, RequestMappingHandler> handlerRegistry;
+    List<HandlerInterceptor> handlerInterceptors;
+
+    public AbstractHandlerMapping(ApplicationContext mvcContext) {
+        this.mvcContext = mvcContext;
+        handlerInterceptors = new ArrayList<>();
+        handlerRegistry = new HashMap<>();
+        init(); // 模板方法
+    }
+  	protected void init() {
+
+    }
+}
+````
+
+- getHandler方法：每次调用都会通过url 获取这次请求对应的目标方法，还有收集匹配到的HandlerInterceptro，然后包装成HandlerExecutionChain 返回
+
+  ```java
+  @Override
+  public HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
+    HandlerExecutionChain handlerExecutionChain = new HandlerExecutionChain();
+    // 设置此次请求 对应的处理方法
+    handlerExecutionChain.setHandler(handlerRegistry.get(request.getServletPath()));
+    // 获取此次请求匹配的拦截器
+    List<HandlerInterceptor> interceptors = filterWithUrl(handlerInterceptors, request.getRequestURI());
+    handlerExecutionChain.setInterceptors(interceptors);
+    // 返回构建好的HandleExecutionChain
+    return handlerExecutionChain;
+  }
+  ```
+
+- filterWithUrl方法：这里只做了简单的实现，只要HandleInterceptor 的path符合url的一部分，就算是这次请求的拦截器
+
+  ```java
+  private List<HandlerInterceptor> filterWithUrl(List<HandlerInterceptor> handlerInterceptors, String requestURI) {
+    List<HandlerInterceptor> result = new ArrayList<>();
+    // 找到匹配的拦截器
+    boolean isMatch = false;
+    for (HandlerInterceptor handlerInterceptor : handlerInterceptors) {
+      isMatch = false;
+      for (String path : handlerInterceptor.getPath()) {
+        if (requestURI.contains(path)) {
+          isMatch = true;
+          break;
+        }
+      }
+      // 该请求路径 符合拦截器配置的路径规则
+      if (isMatch) {
+        result.add(handlerInterceptor);
+      }
+    }
+    return result;
+  }
+  ```
+
+## AnnotationHandlerMapping
+
+```java
+public class AnnotationHandleMapping extends AbstractHandlerMapping {
+
+    public AnnotationHandleMapping(ApplicationContext mvcContext) {
+    		// 调用父类构造器实现初始化
+        // 而父类构造器里面会调用模板方法init，我们重写了init，所以会调用下面的init方法初始化
+        super(mvcContext);
+    }
+
+    // 重写模板方法init，父类构造器初始化时回调这个方法
+    @Override
+    protected void init() {
+        // 注册map，保存url和handler的对应关系。这些键值对保存在父类的 handlerRegistry属性中
+        registryURLAndHandler();
+        // 找到容器中定义的HandlerInterceptor的实现，赋值给父类的 handlerInterceptors 属性
+        initHandlerInterceptors();
+    }
+}
+```
+
+## DispatcherServlet
+
+拦截器代码的实现
+
+```java
+protected void service(HttpServletRequest req, HttpServletResponse resp) {
+  try {
+    doDispatch(req, resp);
+  } catch (Exception e) {
+    e.printStackTrace();
+  }
+}
+
+private void doDispatch(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+  // 找到请求对应的handler
+  HandlerExecutionChain handlerExecutionChain = handlerMapping.getHandler(req);
+  RequestMappingHandler handler = handlerExecutionChain.getHandler();
+  List<HandlerInterceptor> handlerInterceptors = handlerExecutionChain.getInterceptors();
+
+  // 拦截器执行特点： 先执行全部的preHandler方法。只要执行的preHandler方法没有返回false 那么对应的afterCompletion一定会执行。
+  for (int i = 0; i < handlerInterceptors.size(); i++) {
+    HandlerInterceptor handlerInterceptor = handlerInterceptors.get(i);
+    if (!handlerInterceptor.preHandle(req, resp, handler)) {
+      for (int j = i - 1; j >= 0; j--) {
+        handlerInterceptors.get(j).afterCompletion(req, resp, handler, new Exception());
+      }
+      break;
+    }
+  }
+  // 只要某一个HandlerInterceptor 的 preHandler 返回了false，那么不应该调用目标方法（这里还没有实现这个功能）
+  // 至于如何传参，就是HandlerAdapter的事情了
+  handler.getMethod().invoke(handler.getBean(), null);
+}
+```
 

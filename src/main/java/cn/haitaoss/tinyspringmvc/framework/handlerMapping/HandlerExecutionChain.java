@@ -1,5 +1,7 @@
 package cn.haitaoss.tinyspringmvc.framework.handlerMapping;
 
+import java.util.List;
+
 /**
  * @author haitao.chen
  * email haitaoss@aliyun.com
@@ -8,7 +10,7 @@ package cn.haitaoss.tinyspringmvc.framework.handlerMapping;
  */
 public class HandlerExecutionChain {
     private RequestMappingHandler handler;
-    private HandleInterceptor[] interceptors;
+    private List<HandlerInterceptor> interceptors;
 
     public RequestMappingHandler getHandler() {
         return handler;
@@ -18,11 +20,11 @@ public class HandlerExecutionChain {
         this.handler = handler;
     }
 
-    public HandleInterceptor[] getInterceptors() {
+    public List<HandlerInterceptor> getInterceptors() {
         return interceptors;
     }
 
-    public void setInterceptors(HandleInterceptor[] interceptors) {
+    public void setInterceptors(List<HandlerInterceptor> interceptors) {
         this.interceptors = interceptors;
     }
 }

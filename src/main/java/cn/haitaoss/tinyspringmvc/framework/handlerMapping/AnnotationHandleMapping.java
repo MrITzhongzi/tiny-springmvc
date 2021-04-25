@@ -4,10 +4,8 @@ import cn.haitaoss.tinyioc.beans.BeanDefinition;
 import cn.haitaoss.tinyioc.context.ApplicationContext;
 import cn.haitaoss.tinyspringmvc.framework.annotation.RequestMapping;
 
-import javax.servlet.http.HttpServletRequest;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -16,39 +14,33 @@ import java.util.Map;
  * date 2021-04-24 18:47
  *
  */
-public class AnnotationHandleMapping implements HandlerMapping {
-    private ApplicationContext mvcContext;
-    private Map<String, RequestMappingHandler> handlerRegistry;
+public class AnnotationHandleMapping extends AbstractHandlerMapping {
 
     public AnnotationHandleMapping(ApplicationContext mvcContext) {
-        this.mvcContext = mvcContext;
-        this.handlerRegistry = new HashMap<>();
-        init();
+        super(mvcContext);
     }
 
-    public ApplicationContext getMvcContext() {
-        return mvcContext;
-    }
-
-    public void setMvcContext(ApplicationContext mvcContext) {
-        this.mvcContext = mvcContext;
-    }
-
-    public Map<String, RequestMappingHandler> getHandlerRegistry() {
-        return handlerRegistry;
-    }
-
-    public void setHandlerRegistry(Map<String, RequestMappingHandler> handlerRegistry) {
-        this.handlerRegistry = handlerRegistry;
-    }
 
     @Override
-    public HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
-        HandlerExecutionChain handlerExecutionChain = new HandlerExecutionChain();
-        // 根据请求uri 找到对应的handle
-        RequestMappingHandler requestMappingHandler = handlerRegistry.get(request.getServletPath());
-        handlerExecutionChain.setHandler(requestMappingHandler);
-        return handlerExecutionChain;
+    protected void init() {
+        // 注册map，保存url和handler的对应关系
+        registryURLAndHandler();
+        // 找到容器中定义的HandlerInterceptor
+        initHandlerInterceptors();
+    }
+
+    /**
+     * 收集容器中所有的HandlerInterceptor 的实现，保存到父类handlerInterceptors属性中
+     * @author haitao.chen
+     * email
+     * date 2021/4/25 10:11 上午
+     */
+    private void initHandlerInterceptors() {
+        try {
+            handlerInterceptors = mvcContext.getBeanFactory().getBeansForType(HandlerInterceptor.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -58,10 +50,9 @@ public class AnnotationHandleMapping implements HandlerMapping {
      * email
      * date 2021/4/24 6:54 下午
      */
-    @Override
-    public void init() {
+    private void registryURLAndHandler() {
         // 找到容器中所有标注了 @RequestMapping 的类
-        for (Map.Entry<String, BeanDefinition> entry : this.mvcContext.getBeanFactory().getBeanDefinitionMap().entrySet()) {
+        for (Map.Entry<String, BeanDefinition> entry : mvcContext.getBeanFactory().getBeanDefinitionMap().entrySet()) {
             Class clazz = entry.getValue().getBeanClass();
             Object bean = entry.getValue().getBean();
 
@@ -82,7 +73,7 @@ public class AnnotationHandleMapping implements HandlerMapping {
                 suffix = ((RequestMapping) annotation).value();
 
                 // 构建RequestMappingHandle 然后注册到handlerRegistry 中
-                this.handlerRegistry.put(prefix + suffix, new RequestMappingHandler(bean, declaredMethod, null));
+                handlerRegistry.put(prefix + suffix, new RequestMappingHandler(bean, declaredMethod, null));
             }
 
         }

@@ -2,16 +2,14 @@ package cn.haitaoss.tinyspringmvc.framework.servlet;
 
 import cn.haitaoss.tinyioc.context.ApplicationContext;
 import cn.haitaoss.tinyioc.context.ClassPathXmlApplicationContext;
-import cn.haitaoss.tinyspringmvc.framework.handlerMapping.AnnotationHandleMapping;
-import cn.haitaoss.tinyspringmvc.framework.handlerMapping.HandlerExecutionChain;
-import cn.haitaoss.tinyspringmvc.framework.handlerMapping.HandlerMapping;
-import cn.haitaoss.tinyspringmvc.framework.handlerMapping.RequestMappingHandler;
+import cn.haitaoss.tinyspringmvc.framework.handlerMapping.*;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 /**
  * @author haitao.chen
@@ -31,7 +29,6 @@ public class DispatcherServlet extends HttpServlet {
     }
 
     private void doInit() throws ServletException {
-        super.init();
         System.out.println("DispatcherServlet...init\tspring子容器(mvc)");
         // 获取mvc配置文件
         String mvcXmlPath = this.getInitParameter("contextConfigLocation");
@@ -65,9 +62,20 @@ public class DispatcherServlet extends HttpServlet {
     private void doDispatch(HttpServletRequest req, HttpServletResponse resp) throws Exception {
         // 找到请求对应的handler
         HandlerExecutionChain handlerExecutionChain = handlerMapping.getHandler(req);
-
-        // 执行目标方法
         RequestMappingHandler handler = handlerExecutionChain.getHandler();
+        List<HandlerInterceptor> handlerInterceptors = handlerExecutionChain.getInterceptors();
+
+        // 拦截器执行特点： 先执行全部的preHandler方法。只要执行的preHandler方法没有返回false 那么对应的afterCompletion一定会执行。
+        for (int i = 0; i < handlerInterceptors.size(); i++) {
+            HandlerInterceptor handlerInterceptor = handlerInterceptors.get(i);
+            if (!handlerInterceptor.preHandle(req, resp, handler)) {
+                for (int j = i - 1; j >= 0; j--) {
+                    handlerInterceptors.get(j).afterCompletion(req, resp, handler, new Exception());
+                }
+                break;
+            }
+        }
+        // 只要某一个HandlerInterceptor 的 preHandler 返回了false，那么不应该调用目标方法（这里还没有实现这个功能）
         // 至于如何传参，就是HandlerAdapter的事情了
         handler.getMethod().invoke(handler.getBean(), null);
     }

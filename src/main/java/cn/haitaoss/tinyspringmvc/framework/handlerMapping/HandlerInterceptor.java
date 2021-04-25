@@ -1,7 +1,5 @@
 package cn.haitaoss.tinyspringmvc.framework.handlerMapping;
 
-import org.aopalliance.intercept.MethodInterceptor;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -10,7 +8,16 @@ import javax.servlet.http.HttpServletResponse;
  * email haitaoss@aliyun.com
  * date 2021-04-24 17:05
  */
-public interface HandleInterceptor extends MethodInterceptor {
+public interface HandlerInterceptor {
+    /**
+     * 该方法规定被拦截的地址
+     * @author haitao.chen
+     * email
+     * date 2021/4/24 9:33 下午
+     * @return java.lang.String[]
+     */
+    String[] getPath();
+
     /**
      * 该方法在请求处理之前调用，返回true表示交给下一个拦截器，返回false表示到此为止
      * @author haitao.chen

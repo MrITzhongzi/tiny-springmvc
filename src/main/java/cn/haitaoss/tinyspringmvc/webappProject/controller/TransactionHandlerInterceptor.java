@@ -10,11 +10,11 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * @author haitao.chen
  * email haitaoss@aliyun.com
- * date 2021-04-24 19:22
+ * date 2021-04-24 22:58
  *
  */
 @Component
-public class LoggerInterceptor implements HandlerInterceptor {
+public class TransactionHandlerInterceptor implements HandlerInterceptor {
     @Override
     public String[] getPath() {
         return new String[]{"/mvc/person/"};
@@ -22,16 +22,17 @@ public class LoggerInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        System.out.println("LoggerInterceptor...preHandle()");
+        System.out.println("TransactionHandlerInterceptor...preHandle()");
         return true;
     }
 
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
+        System.out.println("Transaction的postHandle");
     }
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-        System.out.println("LoggerInterceptor...afterCompletion()");
+        System.out.println("TransactionHandlerInterceptor...afterCompletion()");
     }
 }
