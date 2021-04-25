@@ -7,4 +7,17 @@ package cn.haitaoss.tinyspringmvc.framework.modelAndView;
  *
  */
 public class ModelAndView {
+    private Object bean;
+
+    public ModelAndView(Object bean) {
+        this.bean = bean;
+    }
+
+    public Object getBean() {
+        return bean;
+    }
+
+    public void setBean(Object bean) {
+        this.bean = bean;
+    }
 }

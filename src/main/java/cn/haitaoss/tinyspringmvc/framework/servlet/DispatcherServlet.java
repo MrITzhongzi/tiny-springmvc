@@ -2,13 +2,18 @@ package cn.haitaoss.tinyspringmvc.framework.servlet;
 
 import cn.haitaoss.tinyioc.context.ApplicationContext;
 import cn.haitaoss.tinyioc.context.ClassPathXmlApplicationContext;
+import cn.haitaoss.tinyspringmvc.framework.handlerAdapter.AnnotationHandlerAdapter;
+import cn.haitaoss.tinyspringmvc.framework.handlerAdapter.ControllerHandlerAdapter;
+import cn.haitaoss.tinyspringmvc.framework.handlerAdapter.HandlerAdapter;
 import cn.haitaoss.tinyspringmvc.framework.handlerMapping.*;
+import cn.haitaoss.tinyspringmvc.framework.modelAndView.ModelAndView;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -20,6 +25,7 @@ import java.util.List;
 public class DispatcherServlet extends HttpServlet {
     private ApplicationContext mvcContext;
     private HandlerMapping handlerMapping;
+    private List<HandlerAdapter> handlerAdapters = null;
 
     @Override
     public void init() throws ServletException {
@@ -48,10 +54,18 @@ public class DispatcherServlet extends HttpServlet {
         }
 
         // 初始化HandlerMapping
-        InitHandlerMapping(mvcContext);
+        initHandlerMappings(mvcContext);
+        // 初始化handlerAdapter
+        initHandlerAdapters(mvcContext);
     }
 
-    private void InitHandlerMapping(ApplicationContext mvcContext) {
+    private void initHandlerAdapters(ApplicationContext mvcContext) {
+        handlerAdapters = new ArrayList<>();
+        handlerAdapters.add(new AnnotationHandlerAdapter(mvcContext));
+        handlerAdapters.add(new ControllerHandlerAdapter(mvcContext));
+    }
+
+    private void initHandlerMappings(ApplicationContext mvcContext) {
         // 默认的handlerMapping 是 AnnotationHandlerMapping
         handlerMapping = new AnnotationHandlerMapping(mvcContext);
         ((AnnotationHandlerMapping) handlerMapping).init();
@@ -70,11 +84,56 @@ public class DispatcherServlet extends HttpServlet {
     }
 
     private void doDispatch(HttpServletRequest req, HttpServletResponse resp) throws Exception {
-        // 找到请求对应的handler
-        HandlerExecutionChain handlerExecutionChain = handlerMapping.getHandler(req);
+        // 找到请求对应的handlerMapping
+        HandlerExecutionChain handlerExecutionChain = doHandlerMapping(req);
         Object handler = handlerExecutionChain.getHandler();
         List<HandlerInterceptor> handlerInterceptors = handlerExecutionChain.getInterceptors();
 
+        // 进行前置处理，执行handlerInterceptor.preHandle
+        doInterceptorsPreHandle(req, resp, handlerInterceptors, handler);
+
+        // 进入HandlerAdapter模块(里面会执行req 对应的 method)
+        // modelAndView 是执行方法的返回结果
+        ModelAndView modelAndView = doHandlerAdapter(req, resp, handler);
+
+        // 进行POST处理，执行handlerInterceptor.postHandle
+        doInterceptorsPostHandle(req, resp, handlerInterceptors, handler, modelAndView);
+
+    }
+
+    private void doInterceptorsPostHandle(HttpServletRequest request, HttpServletResponse response, List<HandlerInterceptor> handlerInterceptors, Object handler, ModelAndView mv) throws Exception {
+        for (int i = handlerInterceptors.size() - 1; i >= 0; i--) {
+            HandlerInterceptor interceptor = handlerInterceptors.get(i);
+            interceptor.postHandle(request, response, handler, mv);
+        }
+    }
+
+    private void doInterceptorsAfterCompletion(HttpServletRequest request, HttpServletResponse response, List<HandlerInterceptor> handlerInterceptors, Object handler, Exception ex) throws Exception {
+        for (int i = handlerInterceptors.size() - 1; i >= 0; i--) {
+            HandlerInterceptor interceptor = handlerInterceptors.get(i);
+            interceptor.afterCompletion(request, response, handler, ex);
+        }
+    }
+
+    private ModelAndView doHandlerAdapter(HttpServletRequest req, HttpServletResponse resp, Object handler) throws Exception {
+        HandlerAdapter handlerAdapter = getHandlerAdapter(handler);
+        ModelAndView mv = handlerAdapter.handle(req, resp, handler);
+        return mv;
+    }
+
+    private HandlerAdapter getHandlerAdapter(Object handler) {
+        for (HandlerAdapter adapter : this.handlerAdapters) {
+            if (adapter.supports(handler))
+                return adapter;
+        }
+        return null;
+    }
+
+    private HandlerExecutionChain doHandlerMapping(HttpServletRequest request) throws Exception {
+        return handlerMapping.getHandler(request);
+    }
+
+    private void doInterceptorsPreHandle(HttpServletRequest req, HttpServletResponse resp, List<HandlerInterceptor> handlerInterceptors, Object handler) throws Exception {
         // 拦截器执行特点： 先执行全部的preHandler方法。只要执行的preHandler方法没有返回false 那么对应的afterCompletion一定会执行。
         for (int i = 0; i < handlerInterceptors.size(); i++) {
             HandlerInterceptor handlerInterceptor = handlerInterceptors.get(i);
@@ -84,11 +143,6 @@ public class DispatcherServlet extends HttpServlet {
                 }
                 break;
             }
-        }
-        // 只要某一个HandlerInterceptor 的 preHandler 返回了false，那么不应该调用目标方法（这里还没有实现这个功能）
-        // 至于如何传参，就是HandlerAdapter的事情了
-        if (handler instanceof RequestMappingHandler) {
-            ((RequestMappingHandler) handler).getMethod().invoke(((RequestMappingHandler) handler).getBean(), null);
         }
     }
 }

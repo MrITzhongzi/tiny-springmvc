@@ -421,3 +421,177 @@ private void doDispatch(HttpServletRequest req, HttpServletResponse resp) throws
 }
 ```
 
+# step-3.1-solveHandlerAdapter
+
+> 实现HandlerAdapter
+
+## HandlerAdapter
+
+HandlerAdapter 是一个接口，定义规范。
+
+```java
+public interface HandlerAdapter {
+  boolean supports(Object handler);
+  ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception;
+}
+```
+
+## AbstractHandlerAdapter
+
+AbstractHandlerAdapter 是 HandlerAdapter接口的实现，编写通用的东西(主要是属性)
+
+```java
+public abstract class AbstractHandlerAdapter implements HandlerAdapter {
+    protected ApplicationContext mvcContext;
+
+    public AbstractHandlerAdapter(ApplicationContext mvcContext) {
+        this.mvcContext = mvcContext;
+    }
+}
+```
+
+## AnnotationHandlerAdapter
+
+AnnotationHandlerAdapter 只处理RequestMappingHandler
+
+```java
+public class AnnotationHandlerAdapter extends AbstractHandlerAdapter {
+    public AnnotationHandlerAdapter(ApplicationContext mvcContext) {
+        super(mvcContext);
+    }
+
+    @Override
+    public boolean supports(Object handler) {
+        if (handler instanceof RequestMappingHandler) {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        RequestMappingHandler rmHandler = (RequestMappingHandler) handler;
+        // 获取方法的执行参数的值
+        Object[] args = ArgumentResolverUtil.resolveRequestParam(request, rmHandler.getMethod());
+        // 执行方法
+        Object obj = rmHandler.getMethod().invoke(rmHandler.getBean(), args);
+        return new ModelAndView(obj);
+    }
+}
+```
+
+收集方法执行参数的思想：
+
+`http://localhost:8080/eat.do?name=haitao&girlfriends=ll&girlfriend=hh`
+
+- 通过HttpServletRequest.getParameterMap() 得到查询参数的map
+- 得到方法的参数类别。`Parameter[] parameters = method.getParameters();`
+- 遍历parameters，通过`parameter.getName() `从map中获取value，
+  - 如果 `value!=null`。判断`parameter.getType == String.class`
+    - 如果是true，参数的值就是value
+    - 如果是false，参数的值需要通过spring容器中的converter解析。`ConverterFactory.getConverterMap().get(parameter.getType()).parse(value)`
+  - 如果`value==null`
+    - 获取参数的类型，通过反射创建实例。`(Class(parameter.getType())).newInstance()`
+    - 然后在使用Beanutils 将map里面的属性值拷贝到 新创建的实例中
+
+```java
+public class ArgumentResolverUtil {
+    public static Object[] resolveRequestParam(HttpServletRequest request, Method method) throws Exception {
+        // 获取方法的参数值
+        Parameter[] parameters = method.getParameters();
+        Object[] args = new Object[parameters.length];
+        if (parameters.length == 0) {
+            return args;
+        }
+
+        // 获取查询参数
+        Map<String, String[]> paramMap = request.getParameterMap();
+        Map<String, String> argMap = new LinkedHashMap<>();
+        for (Map.Entry<String, String[]> entry : paramMap.entrySet()) {
+            String paramName = entry.getKey();
+            String paramValue = "";
+            String[] paramValueArr = entry.getValue();
+            for (int i = 0; i < paramValueArr.length; i++) {
+                if (i == paramValueArr.length - 1)
+                    paramValue += paramValueArr[i];
+                else
+                    paramValue += paramValueArr[i] + ",";
+            }
+            // 处理后的request键值对
+            argMap.put(paramName, paramValue);
+        }
+
+        for (int i = 0; i < parameters.length; i++) {
+            Parameter parameter = parameters[i];
+            if (argMap.containsKey(parameter.getName())) {
+                String value = argMap.get(parameter.getName());
+                Type type = parameter.getType();
+                // 字符串类型，直接赋值
+                if (type == String.class)
+                    args[i] = value;
+                else
+                    // 复杂参数类型 通过converter解析在赋值
+                    args[i] = ConverterFactory.getConverterMap().get(parameter.getType()).parse(value);
+            } else {
+                // 没有的参数，就通过反射创建实例
+                Type type = parameter.getType();
+                Object bean = ((Class) type).newInstance();
+                try {
+                    // 将map里面的属性 拷贝到新创建的实例中
+                    BeanUtils.populate(bean, argMap);
+                    args[i] = ((Class) type).cast(bean);
+                } catch (Exception e) {
+                    args[i] = null;
+                }
+            }
+        }
+        return args;
+    }
+}
+```
+
+## DispatcherServlet
+
+核心的方法
+
+```java
+
+private void doDispatch(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+  // 找到请求对应的handlerMapping
+  HandlerExecutionChain handlerExecutionChain = doHandlerMapping(req);
+  Object handler = handlerExecutionChain.getHandler();
+  List<HandlerInterceptor> handlerInterceptors = handlerExecutionChain.getInterceptors();
+
+  // 进行前置处理，执行handlerInterceptor.preHandle
+  doInterceptorsPreHandle(req, resp, handlerInterceptors, handler);
+
+  // 进入HandlerAdapter模块(里面会执行req 对应的 method)
+  // modelAndView 是执行方法的返回结果
+  ModelAndView modelAndView = doHandlerAdapter(req, resp, handler);
+
+  // 进行POST处理，执行handlerInterceptor.postHandle
+  doInterceptorsPostHandle(req, resp, handlerInterceptors, handler, modelAndView);
+
+}
+```
+
+```java
+private ModelAndView doHandlerAdapter(HttpServletRequest req, HttpServletResponse resp, Object handler) throws Exception {
+  // 获取适配的 handlerAdapter
+  HandlerAdapter handlerAdapter = getHandlerAdapter(handler);
+  ModelAndView mv = handlerAdapter.handle(req, resp, handler);
+  return mv;
+}
+```
+
+```java
+public ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+  RequestMappingHandler rmHandler = (RequestMappingHandler) handler;
+  // 获取方法的执行参数的值
+  Object[] args = ArgumentResolverUtil.resolveRequestParam(request, rmHandler.getMethod());
+  // 执行方法
+  Object obj = rmHandler.getMethod().invoke(rmHandler.getBean(), args);
+  return new ModelAndView(obj);
+}
+```
+

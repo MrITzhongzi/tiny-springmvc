@@ -17,21 +17,24 @@ public class PersonController {
     @Autowired
     private PersonService personService;
 
+    // http://localhost:8080/web/mvc/person/eat.do
     @RequestMapping("eat.do")
     public void eating() {
         System.out.println("I am eating!");
     }
 
-    /**
-     * 这个还不能测试，没有实现参数的分析
-     * @author haitao.chen
-     * email
-     * date 2021/4/24 8:26 下午
-     * @param age
-     */
+    // http://localhost:8080/web/mvc/person/speak.do?age=10
     @RequestMapping("speak.do")
     public void speak(int age) {
         System.out.println("i am " + age + "years old");
+    }
+
+    // http://localhost:8080/web/mvc/person/baby.do?age=10&name=haitao&babyName=haitaoSon&babyAge=10&weight=20
+    @RequestMapping("baby.do")
+    public void baby(Integer age, Baby baby, String name) {
+        System.out.println(age);
+        System.out.println(baby);
+        System.out.println(name);
     }
 
     public PersonService getPersonService() {
