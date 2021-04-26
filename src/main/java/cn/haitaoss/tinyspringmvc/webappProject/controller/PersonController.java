@@ -3,6 +3,7 @@ package cn.haitaoss.tinyspringmvc.webappProject.controller;
 import cn.haitaoss.tinyioc.beans.annotation.Autowired;
 import cn.haitaoss.tinyioc.beans.annotation.Controller;
 import cn.haitaoss.tinyspringmvc.framework.annotation.RequestMapping;
+import cn.haitaoss.tinyspringmvc.framework.annotation.ResponseBody;
 import cn.haitaoss.tinyspringmvc.framework.modelAndView.Model;
 import cn.haitaoss.tinyspringmvc.framework.modelAndView.ModelAndView;
 import cn.haitaoss.tinyspringmvc.webappProject.service.PersonService;
@@ -61,6 +62,13 @@ public class PersonController {
     @RequestMapping("redirect.do")
     public String redirect(HttpServletRequest request) {
         return "redirect:" + request.getContextPath() + "/notice/error.jsp";
+    }
+
+    // http://localhost:8080/web/mvc/person/json.do
+    @ResponseBody
+    @RequestMapping("json.do")
+    public Baby json() {
+        return new Baby("json", 1, 7.6f);
     }
 
     public PersonService getPersonService() {

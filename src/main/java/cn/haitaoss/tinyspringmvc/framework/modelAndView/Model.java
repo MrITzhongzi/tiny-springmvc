@@ -8,6 +8,6 @@ import java.util.LinkedHashMap;
  * date 2021-04-25 16:18
  *
  */
-public class Model extends LinkedHashMap<String,Object> {
+public class Model extends LinkedHashMap<String, Object> {
 
 }

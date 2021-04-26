@@ -1,12 +1,15 @@
 package cn.haitaoss.tinyspringmvc.framework.handlerAdapter;
 
 import cn.haitaoss.tinyioc.context.ApplicationContext;
+import cn.haitaoss.tinyspringmvc.framework.annotation.ResponseBody;
 import cn.haitaoss.tinyspringmvc.framework.handlerMapping.RequestMappingHandler;
 import cn.haitaoss.tinyspringmvc.framework.modelAndView.Model;
 import cn.haitaoss.tinyspringmvc.framework.modelAndView.ModelAndView;
+import com.alibaba.fastjson.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.lang.annotation.Annotation;
 
 /**
  * @author haitao.chen
@@ -21,10 +24,7 @@ public class AnnotationHandlerAdapter extends AbstractHandlerAdapter {
 
     @Override
     public boolean supports(Object handler) {
-        if (handler instanceof RequestMappingHandler) {
-            return true;
-        }
-        return false;
+        return handler instanceof RequestMappingHandler;
     }
 
     @Override
@@ -36,6 +36,18 @@ public class AnnotationHandlerAdapter extends AbstractHandlerAdapter {
         // 执行方法
         Object obj = rmHandler.getMethod().invoke(rmHandler.getBean(), args);
 
+        // return null 就不会进行视图解析
+        Annotation annotation = rmHandler.getMethod().getAnnotation(ResponseBody.class);
+        if (annotation != null) {
+            // 设置json响应头
+            response.setCharacterEncoding("UTF-8");
+            response.setContentType("application/json; charset=utf-8");
+            response.getWriter().write(JSONObject.toJSONString(obj));
+            response.getWriter().close();
+            return null;
+        }
+        if (obj == null)
+            return null;
         if (obj instanceof ModelAndView) {
             return (ModelAndView) obj;
         }

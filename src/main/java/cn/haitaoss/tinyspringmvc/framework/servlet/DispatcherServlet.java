@@ -116,14 +116,17 @@ public class DispatcherServlet extends HttpServlet {
         // modelAndView 是执行方法的返回结果
         ModelAndView mv = doHandlerAdapter(req, resp, handler);
 
-        // 视图解析器解析mv，返回view
-        View view = resolver.resolveViewName(mv.getView());
-        // 页面渲染，渲染其实就是返回信息给客户端
-        view.render(mv.getModel(), req, resp);
-
         // 进行POST处理，执行handlerInterceptor.postHandle
         doInterceptorsPostHandle(req, resp, handlerInterceptors, handler, mv);
 
+        if (mv != null) {
+            // 视图解析器解析mv，返回view
+            View view = resolver.resolveViewName(mv.getView());
+            // 页面渲染，渲染其实就是返回信息给客户端
+            view.render(mv.getModel(), req, resp);
+        }
+
+        doInterceptorsAfterCompletion(req, resp, handlerInterceptors, handler, new Exception());
     }
 
     private void doInterceptorsPostHandle(HttpServletRequest request, HttpServletResponse response, List<HandlerInterceptor> handlerInterceptors, Object handler, ModelAndView mv) throws Exception {

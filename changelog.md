@@ -742,5 +742,66 @@ public class DispatcherServlet extends HttpServlet {
   }
   ```
 
-  
+# step-4.2-solveResponseBody
+
+> ResponseBody的实现
+
+如果方法设置了@ResponseBody注解，那么不应该执行视图解析流程，而是直接将方法返回值转成json字符串输出到response中
+
+- HandlerAdapter.handle()
+
+```java
+ public ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        RequestMappingHandler rmHandler = (RequestMappingHandler) handler;
+        Model model = new Model();
+        // 获取方法的执行参数的值
+        Object[] args = ArgumentResolverUtil.resolveRequestParam(request, rmHandler.getMethod(), model);
+        // 执行方法
+        Object obj = rmHandler.getMethod().invoke(rmHandler.getBean(), args);
+
+        // return null 就会被进行视图解析
+        Annotation annotation = rmHandler.getMethod().getAnnotation(ResponseBody.class);
+        if (annotation != null) {
+            // 设置json响应头
+            response.setCharacterEncoding("UTF-8");
+            response.setContentType("application/json; charset=utf-8");
+            response.getWriter().write(JSONObject.toJSONString(obj));
+            response.getWriter().close();
+            return null;
+        }
+   			.....
+ }
+```
+
+- DispatcherServlet.doDispatch()
+
+```java
+private void doDispatch(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+        // 找到请求对应的handlerMapping
+        HandlerExecutionChain handlerExecutionChain = doHandlerMapping(req);
+        Object handler = handlerExecutionChain.getHandler();
+        List<HandlerInterceptor> handlerInterceptors = handlerExecutionChain.getInterceptors();
+
+        // 进行前置处理，执行handlerInterceptor.preHandle
+        doInterceptorsPreHandle(req, resp, handlerInterceptors, handler);
+
+        // 进入HandlerAdapter模块(里面会执行req 对应的 method)
+        // modelAndView 是执行方法的返回结果
+        ModelAndView mv = doHandlerAdapter(req, resp, handler);
+
+        // 进行POST处理，执行handlerInterceptor.postHandle
+        doInterceptorsPostHandle(req, resp, handlerInterceptors, handler, mv);
+
+        if (mv != null) {
+            // 视图解析器解析mv，返回view
+            View view = resolver.resolveViewName(mv.getView());
+            // 页面渲染，渲染其实就是返回信息给客户端
+            view.render(mv.getModel(), req, resp);
+        }
+
+        doInterceptorsAfterCompletion(req, resp, handlerInterceptors, handler, new Exception());
+    }
+```
+
+
 

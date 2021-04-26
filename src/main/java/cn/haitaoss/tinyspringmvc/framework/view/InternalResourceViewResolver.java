@@ -6,7 +6,7 @@ package cn.haitaoss.tinyspringmvc.framework.view;
  * date 2021-04-25 16:35
  *
  */
-public class InternalResourceViewResolver extends InternalResourceView implements ViewResolver {
+public class InternalResourceViewResolver implements ViewResolver {
     private String viewClass;
     private String prefix;
     private String suffix;
