@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>cn.haitaoss.tinyspringmvc.framework.handlerAdapter.AbstractHandlerAdapter</OriginalElement>
+  <nodes>
+    <node x="191.24999999999994" y="0.0">cn.haitaoss.tinyspringmvc.framework.handlerAdapter.HandlerAdapter</node>
+    <node x="805.6666666666665" y="141.0">cn.haitaoss.tinyspringmvc.framework.handlerAdapter.ArgumentResolverUtil</node>
+    <node x="595.0" y="259.0">cn.haitaoss.tinyspringmvc.framework.handlerAdapter.AnnotationHandlerAdapter</node>
+    <node x="288.74999999999994" y="129.0">cn.haitaoss.tinyspringmvc.framework.handlerAdapter.AbstractHandlerAdapter</node>
+    <node x="0.0" y="259.0">cn.haitaoss.tinyspringmvc.framework.handlerAdapter.ControllerHandlerAdapter</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="cn.haitaoss.tinyspringmvc.framework.handlerAdapter.ControllerHandlerAdapter" target="cn.haitaoss.tinyspringmvc.framework.handlerAdapter.AbstractHandlerAdapter">
+      <point x="143.75" y="-51.5" />
+      <point x="-47.5" y="40.0" />
+    </edge>
+    <edge source="cn.haitaoss.tinyspringmvc.framework.handlerAdapter.AnnotationHandlerAdapter" target="cn.haitaoss.tinyspringmvc.framework.handlerAdapter.AbstractHandlerAdapter">
+      <point x="0.0" y="-51.5" />
+      <point x="882.5" y="229.0" />
+      <point x="621.25" y="229.0" />
+      <point x="142.5" y="40.0" />
+    </edge>
+    <edge source="cn.haitaoss.tinyspringmvc.framework.handlerAdapter.AnnotationHandlerAdapter" target="cn.haitaoss.tinyspringmvc.framework.handlerAdapter.ArgumentResolverUtil">
+      <point x="191.66666666666663" y="-51.5" />
+      <point x="0.0" y="28.0" />
+    </edge>
+    <edge source="cn.haitaoss.tinyspringmvc.framework.handlerAdapter.AbstractHandlerAdapter" target="cn.haitaoss.tinyspringmvc.framework.handlerAdapter.HandlerAdapter">
+      <point x="0.0" y="-40.0" />
+      <point x="0.0" y="39.5" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="1.0" x="679.0" y="134.5" />
+  <SelectedNodes />
+  <Categories>
+    <Category>Fields</Category>
+    <Category>Constructors</Category>
+    <Category>Properties</Category>
+    <Category>Methods</Category>
+    <Category>Inner Classes</Category>
+  </Categories>
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>private</VISIBILITY>
+</Diagram>
+

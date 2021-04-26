@@ -18,7 +18,7 @@
 
 ## 主要的几个类
 
-![image-20210424204448558](.changelog_imgs/image-20210424204448558.png)
+![image-20210424204448558](.imgs/image-20210424204448558.png)
 
 - RequestMappingHandler：封装了要执行的方法method，执行方法的对象bean以及参数args
 - HandlerExecutionChain：其中封装了1个RequestMappingHandler实例和1个拦截器列表
@@ -234,7 +234,7 @@
 
 > 实现拦截器 和 修改类结构
 
-![image-20210425100426610](.changelog_imgs/image-20210425100426610.png)
+![image-20210425100426610](.imgs/image-20210425100426610.png)
 
 ## AbstractHandlerMapping
 
@@ -603,7 +603,7 @@ public ModelAndView handle(HttpServletRequest request, HttpServletResponse respo
 
 ## 类图
 
-![image-20210425170631447](.changelog_imgs/image-20210425170631447.png)
+![image-20210425170631447](.imgs/image-20210425170631447.png)
 
 ## ViewResolver
 
