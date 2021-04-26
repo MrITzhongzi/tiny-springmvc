@@ -1,3 +1,10 @@
+# 参考
+- 原作者：https://github.com/HuangtianyuCN/SonihrSpringMVC
+- 原博客：https://blog.csdn.net/w8253497062015/article/details/90613246
+
+# 本项目前驱项目
+tiny-spring：https://github.com/haitaoss/tiny-spring
+
 # SpringMVC和核心对象
 
 - ContextLoaderListener：实现ServletContextListener，在web.xml 中声明使用。tomcat容器启动时会反射创建这个对象并调用其生命周期方法。
